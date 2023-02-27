@@ -31,16 +31,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String getUsernameFromJWT(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getSubject();
-    }
-
-    public String getJwtFromBearerToken(String token) {
+    public String getUsernameFromJWT(String token) throws MalformedJwtException  {
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtSecret)
                 .parseClaimsJws(token)

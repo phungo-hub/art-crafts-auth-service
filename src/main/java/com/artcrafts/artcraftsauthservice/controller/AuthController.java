@@ -53,7 +53,7 @@ public class AuthController {
     }
 
     @PostMapping("/auth-validate")
-    public Boolean validateAuthenticate(String token) {
+    public Boolean validateAuthenticate(@RequestHeader(value = "Authorization") String token) {
         if (securityService.isAuthenticated() && securityService.isValidToken(token))
             return true;
         return false;
