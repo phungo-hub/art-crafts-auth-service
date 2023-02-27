@@ -3,6 +3,7 @@ package com.artcrafts.artcraftsauthservice.controller;
 
 import com.artcrafts.artcraftsauthservice.payload.request.LoginRequest;
 import com.artcrafts.artcraftsauthservice.payload.response.LoginResponse;
+import com.artcrafts.artcraftsauthservice.repository.UserRepository;
 import com.artcrafts.artcraftsauthservice.security.JwtTokenProvider;
 import com.artcrafts.artcraftsauthservice.service.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +12,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(value = "*", maxAge = 3600)
 @RestController
@@ -32,6 +39,9 @@ public class AuthController {
 
     @Autowired
     SecurityService securityService;
+
+    @Autowired
+    UserRepository userRepository;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
@@ -57,5 +67,14 @@ public class AuthController {
         if (securityService.isAuthenticated() && securityService.isValidToken(token))
             return true;
         return false;
+    }
+
+    @PostMapping("/return-role")
+    public List<String> returnRoles(@RequestHeader(value = "Authorization") String authToken) {
+        if (authToken.startsWith("Bearer"))
+            authToken = authToken.substring(7);
+        String username = tokenProvider.getUsernameFromJWT(authToken);
+        List<String> roles = userRepository.findRolesByUsername(username);
+        return roles;
     }
 }

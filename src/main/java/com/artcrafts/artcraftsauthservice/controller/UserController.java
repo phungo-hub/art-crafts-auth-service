@@ -5,7 +5,6 @@ import com.artcrafts.artcraftsauthservice.payload.response.ResponseMessage;
 import com.artcrafts.artcraftsauthservice.service.RoleService;
 import com.artcrafts.artcraftsauthservice.service.SecurityService;
 import com.artcrafts.artcraftsauthservice.service.UserService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,17 +21,15 @@ public class UserController {
     RoleService roleService;
     @Autowired
     SecurityService securityService;
-    @Autowired
-    private ModelMapper modelMapper;
 
     @GetMapping
     public ResponseEntity<?> showUsers(@RequestHeader("Authorization") final String authToken) {
         if (!securityService.isAuthenticated() && !securityService.isValidToken(authToken)) {
             return new ResponseEntity<String>("Unauthorized error.", HttpStatus.UNAUTHORIZED);
         }
-
         Iterable<UserDto> users = userService.findAll();
         if (users == null) {
+            System.out.println(users == null);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(users, HttpStatus.OK);

@@ -17,7 +17,6 @@ import java.util.List;
 @Service
 @Transactional
 public class UserDetailsServiceImpl implements UserDetailsService {
-
     @Autowired
     private UserRepository userRepository;
 
@@ -30,6 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
 
         List<String> roles = userRepository.findRolesByUsername(username);
+
 
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         for (String role: roles) {
