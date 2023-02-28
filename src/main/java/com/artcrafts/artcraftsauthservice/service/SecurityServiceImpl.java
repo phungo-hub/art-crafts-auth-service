@@ -1,6 +1,5 @@
 package com.artcrafts.artcraftsauthservice.service;
 
-
 import com.artcrafts.artcraftsauthservice.security.JwtTokenProvider;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,7 +27,9 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     public boolean isValidToken(String authToken) {
-        String jwt = jwtTokenProvider.getJwtFromBearerToken(authToken);
+        if (authToken.startsWith("Bearer"))
+            authToken = authToken.substring(7);
+        String jwt = jwtTokenProvider.getUsernameFromJWT(authToken);
         if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(authToken)) {
             return true;
         }
