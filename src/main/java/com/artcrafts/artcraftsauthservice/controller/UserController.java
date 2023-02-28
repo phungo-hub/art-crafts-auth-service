@@ -5,6 +5,7 @@ import com.artcrafts.artcraftsauthservice.payload.response.ResponseMessage;
 import com.artcrafts.artcraftsauthservice.service.RoleService;
 import com.artcrafts.artcraftsauthservice.service.SecurityService;
 import com.artcrafts.artcraftsauthservice.service.UserService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +26,11 @@ public class UserController {
     @GetMapping
     public ResponseEntity<?> showUsers(@RequestHeader("Authorization") final String authToken) {
         if (!securityService.isAuthenticated() && !securityService.isValidToken(authToken)) {
-            return new ResponseEntity<String>("Unauthorized error.", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new ResponseMessage("Fail -> NOT FOUND"), HttpStatus.NOT_FOUND);
         }
         Iterable<UserDto> users = userService.findAll();
+
         if (users == null) {
-            System.out.println(users == null);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(users, HttpStatus.OK);
@@ -38,7 +39,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> registerUser(@RequestBody UserDto userDto, @RequestHeader("Authorization") final String authToken) {
         if (!securityService.isAuthenticated() && !securityService.isValidToken(authToken)) {
-            return new ResponseEntity<String>("Unauthorized error.", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new ResponseMessage("Fail -> NOT FOUND"), HttpStatus.UNAUTHORIZED);
         }
         if (userService.existsByUsername(userDto.getUsername())) {
             return new ResponseEntity<>(new ResponseMessage("Fail -> Username is already taken!"),
@@ -56,6 +57,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @ApiOperation(value = "update User by id")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
         Optional<UserDto> userDto1 = userService.findById(id);
 
@@ -75,6 +77,7 @@ public class UserController {
         return new ResponseEntity<>(new ResponseMessage("Update success!"), HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "delete User by id")
     public ResponseEntity<?> deleteUser(@PathVariable Long id){
         Optional<UserDto> userDto = userService.findById(id);
 
@@ -86,9 +89,10 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @ApiOperation(value = "show User by id")
     public ResponseEntity<?> showUser(@PathVariable Long id, @RequestHeader("Authorization") final String authToken) {
         if (!securityService.isAuthenticated() && !securityService.isValidToken(authToken)) {
-            return new ResponseEntity<String>("Unauthorized error.", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new ResponseMessage("Fail -> NOT FOUND"), HttpStatus.NOT_FOUND);
         }
 
         Optional<UserDto> userDto = userService.findById(id);

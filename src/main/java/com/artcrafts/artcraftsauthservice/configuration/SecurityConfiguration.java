@@ -96,13 +96,13 @@ public class SecurityConfiguration {
         // Pages require login with role: ROLE_ADMIN.
         // If not login at admin role yet, redirect to /login
         http.authorizeHttpRequests()
-                .antMatchers("/api/role/**")
+                .antMatchers("/api/role/**", "/api/user/**")
                 .hasRole("SUPER_ADMIN");
 
         // Pages require login with role: ROLE_ADMIN
         // If not login at user role yet, redirect to /login
         http.authorizeHttpRequests()
-                .antMatchers("/api/role/**","/api/orders/**", "/api/user/**")
+                .antMatchers("/api/role/**","/api/orders/**")
                 .hasRole("ADMIN");
 
         // When user login with ROLE_USER, but try to

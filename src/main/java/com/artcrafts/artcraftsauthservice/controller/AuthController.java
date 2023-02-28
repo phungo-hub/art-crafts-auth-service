@@ -6,23 +6,20 @@ import com.artcrafts.artcraftsauthservice.payload.response.LoginResponse;
 import com.artcrafts.artcraftsauthservice.repository.UserRepository;
 import com.artcrafts.artcraftsauthservice.security.JwtTokenProvider;
 import com.artcrafts.artcraftsauthservice.service.SecurityService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @CrossOrigin(value = "*", maxAge = 3600)
 @RestController
@@ -44,6 +41,8 @@ public class AuthController {
     UserRepository userRepository;
 
     @PostMapping("/login")
+    @ApiOperation(value = "Login into Admin system",
+            notes = "Provide username and password")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             // Gọi hàm authenticate để xác thực thông tin đăng nhập
@@ -63,14 +62,20 @@ public class AuthController {
     }
 
     @PostMapping("/auth-validate")
-    public Boolean validateAuthenticate(@RequestHeader(value = "Authorization") String token) {
+    @ApiOperation(value = "Authenticate and validate token for other services",
+            notes = "Take in an authToken as parameter from other services")
+    public Boolean validateAuthenticate(@ApiParam(value = "Token value from other services")
+                    @RequestHeader(value = "Authorization") String token) {
         if (securityService.isAuthenticated() && securityService.isValidToken(token))
             return true;
         return false;
     }
 
     @PostMapping("/return-role")
-    public List<String> returnRoles(@RequestHeader(value = "Authorization") String authToken) {
+    @ApiOperation(value = "Return roles for authorization to other services",
+            notes = "Take in an authToken as parameter from other services ")
+    public List<String> returnRoles(@ApiParam(value = "Token value from other services")
+            @RequestHeader(value = "Authorization") String authToken) {
         if (authToken.startsWith("Bearer"))
             authToken = authToken.substring(7);
         String username = tokenProvider.getUsernameFromJWT(authToken);
