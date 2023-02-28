@@ -1,6 +1,8 @@
 package com.artcrafts.artcraftsauthservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -16,6 +18,7 @@ import java.util.Set;
 @Table(name = "users",
         uniqueConstraints = {@UniqueConstraint(name = "users_uk",
                 columnNames = {"email", "username"})})
+@ApiModel(description = "Details about user entity")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

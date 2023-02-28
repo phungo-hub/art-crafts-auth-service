@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,6 +25,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.servlet.Filter;
+import javax.servlet.http.Cookie;
 
 @EnableAutoConfiguration
 @EnableWebSecurity
@@ -88,19 +90,19 @@ public class SecurityConfiguration {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeHttpRequests() // links start with /api/
-                .antMatchers("/api/*", "/api/auth/login","/api/user") // perform segregate authorize
+                .antMatchers( "/api/auth/login") // perform segregate authorize
                 .permitAll();
 
         // Pages require login with role: ROLE_ADMIN.
         // If not login at admin role yet, redirect to /login
         http.authorizeHttpRequests()
-                .antMatchers("/api/role/**", "/api/user/**", "localhost:8001/api/orders/**")
+                .antMatchers("/api/role/**", "/api/user/**")
                 .hasRole("SUPER_ADMIN");
 
-        // Pages require login with role: ROLE_USER
+        // Pages require login with role: ROLE_ADMIN
         // If not login at user role yet, redirect to /login
         http.authorizeHttpRequests()
-                .antMatchers("/api/user/**")
+                .antMatchers("/api/role/**","/api/orders/**")
                 .hasRole("ADMIN");
 
         // When user login with ROLE_USER, but try to
