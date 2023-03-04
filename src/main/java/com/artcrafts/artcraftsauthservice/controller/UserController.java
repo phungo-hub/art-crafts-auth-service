@@ -5,33 +5,41 @@ import com.artcrafts.artcraftsauthservice.payload.response.ResponseMessage;
 import com.artcrafts.artcraftsauthservice.service.RoleService;
 import com.artcrafts.artcraftsauthservice.service.SecurityService;
 import com.artcrafts.artcraftsauthservice.service.UserService;
-import org.modelmapper.ModelMapper;
+import io.swagger.annotations.ApiOperation;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
+@CrossOrigin
 public class UserController {
+    private static String imageDirectory = System.getProperty("user.dir") + "/images/";
     @Autowired
     UserService userService;
     @Autowired
     RoleService roleService;
     @Autowired
     SecurityService securityService;
-    @Autowired
-    private ModelMapper modelMapper;
 
     @GetMapping
     public ResponseEntity<?> showUsers(@RequestHeader("Authorization") final String authToken) {
         if (!securityService.isAuthenticated() && !securityService.isValidToken(authToken)) {
-            return new ResponseEntity<String>("Unauthorized error.", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new ResponseMessage("Fail -> NOT FOUND"), HttpStatus.NOT_FOUND);
         }
-
         Iterable<UserDto> users = userService.findAll();
+
         if (users == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -41,7 +49,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> registerUser(@RequestBody UserDto userDto, @RequestHeader("Authorization") final String authToken) {
         if (!securityService.isAuthenticated() && !securityService.isValidToken(authToken)) {
-            return new ResponseEntity<String>("Unauthorized error.", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new ResponseMessage("Fail -> NOT FOUND"), HttpStatus.UNAUTHORIZED);
         }
         if (userService.existsByUsername(userDto.getUsername())) {
             return new ResponseEntity<>(new ResponseMessage("Fail -> Username is already taken!"),
@@ -58,7 +66,10 @@ public class UserController {
         return new ResponseEntity<>(new ResponseMessage("User registered successfully!"), HttpStatus.OK);
     }
 
+
+
     @PutMapping("/{id}")
+    @ApiOperation(value = "update User by id")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
         Optional<UserDto> userDto1 = userService.findById(id);
 
@@ -78,6 +89,7 @@ public class UserController {
         return new ResponseEntity<>(new ResponseMessage("Update success!"), HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "delete User by id")
     public ResponseEntity<?> deleteUser(@PathVariable Long id){
         Optional<UserDto> userDto = userService.findById(id);
 
@@ -89,9 +101,10 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @ApiOperation(value = "show User by id")
     public ResponseEntity<?> showUser(@PathVariable Long id, @RequestHeader("Authorization") final String authToken) {
         if (!securityService.isAuthenticated() && !securityService.isValidToken(authToken)) {
-            return new ResponseEntity<String>("Unauthorized error.", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new ResponseMessage("Fail -> NOT FOUND"), HttpStatus.NOT_FOUND);
         }
 
         Optional<UserDto> userDto = userService.findById(id);
@@ -99,5 +112,25 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(userDto, HttpStatus.OK);
+    }
+
+    private void makeDirectoryIfNotExist(String imageDirectory) {
+        File directory = new File(imageDirectory);
+        if (!directory.exists()) {
+            directory.mkdir();
+        }
+    }
+    @RequestMapping(value = "/uploadImage", produces = {MediaType.IMAGE_JPEG_VALUE, "application/json"})
+    public ResponseEntity<?> uploadImage(@RequestParam("imageFile") MultipartFile file,
+                                         @RequestParam("imageName") String name) {
+        makeDirectoryIfNotExist(imageDirectory);
+        Path fileNamePath = Paths.get(imageDirectory,
+                name.concat(".").concat(FilenameUtils.getExtension(file.getOriginalFilename())));
+        try {
+            Files.write(fileNamePath, file.getBytes());
+            return new ResponseEntity<>(name, HttpStatus.CREATED);
+        } catch (IOException ex) {
+            return new ResponseEntity<>("Image is not uploaded", HttpStatus.BAD_REQUEST);
+        }
     }
 }
