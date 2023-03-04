@@ -9,7 +9,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.util.Collections;
 
 @SpringBootApplication
-
 public class ArtCraftsAuthServiceApplication {
 
     public static void main(String[] args) {

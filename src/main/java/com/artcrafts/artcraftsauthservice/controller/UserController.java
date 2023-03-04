@@ -6,16 +6,26 @@ import com.artcrafts.artcraftsauthservice.service.RoleService;
 import com.artcrafts.artcraftsauthservice.service.SecurityService;
 import com.artcrafts.artcraftsauthservice.service.UserService;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
+@CrossOrigin
 public class UserController {
+    private static String imageDirectory = System.getProperty("user.dir") + "/images/";
     @Autowired
     UserService userService;
     @Autowired
@@ -55,6 +65,8 @@ public class UserController {
 
         return new ResponseEntity<>(new ResponseMessage("User registered successfully!"), HttpStatus.OK);
     }
+
+
 
     @PutMapping("/{id}")
     @ApiOperation(value = "update User by id")
@@ -100,5 +112,25 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(userDto, HttpStatus.OK);
+    }
+
+    private void makeDirectoryIfNotExist(String imageDirectory) {
+        File directory = new File(imageDirectory);
+        if (!directory.exists()) {
+            directory.mkdir();
+        }
+    }
+    @RequestMapping(value = "/uploadImage", produces = {MediaType.IMAGE_JPEG_VALUE, "application/json"})
+    public ResponseEntity<?> uploadImage(@RequestParam("imageFile") MultipartFile file,
+                                         @RequestParam("imageName") String name) {
+        makeDirectoryIfNotExist(imageDirectory);
+        Path fileNamePath = Paths.get(imageDirectory,
+                name.concat(".").concat(FilenameUtils.getExtension(file.getOriginalFilename())));
+        try {
+            Files.write(fileNamePath, file.getBytes());
+            return new ResponseEntity<>(name, HttpStatus.CREATED);
+        } catch (IOException ex) {
+            return new ResponseEntity<>("Image is not uploaded", HttpStatus.BAD_REQUEST);
+        }
     }
 }

@@ -20,7 +20,4 @@ public class UserDto {
     private String avatar;
     @ApiModelProperty(notes = "The user's role(s)")
     private Set<String> roles;
-    public void addRole(String role) {
-        roles.add(role);
-    }
 }
