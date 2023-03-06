@@ -66,8 +66,6 @@ public class UserController {
         return new ResponseEntity<>(new ResponseMessage("User registered successfully!"), HttpStatus.OK);
     }
 
-
-
     @PutMapping("/{id}")
     @ApiOperation(value = "update User by id")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
@@ -132,5 +130,30 @@ public class UserController {
         } catch (IOException ex) {
             return new ResponseEntity<>("Image is not uploaded", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/search")
+    @ApiOperation(value = "Search by username")
+    public ResponseEntity<?> searchByCustomerId(@RequestParam(name = "username", required = false) String username, @RequestHeader("Authorization") String authToken) {
+        if (!securityService.isAuthenticated() && !securityService.isValidToken(authToken)) {
+            return new ResponseEntity<>(new ResponseMessage("Fail -> NOT FOUND"), HttpStatus.NOT_FOUND);
+        }
+
+        Iterable<UserDto> userDto;
+        if (username == null || username.equals("")) {
+            userDto = userService.findAll();
+        } else {
+            try {
+                userDto = userService.findUsersByNameContaining(username);
+            } catch (NumberFormatException e) {
+                return new ResponseEntity<>(new ResponseMessage("BAD_REQUEST"), HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        if (userDto == null) {
+            return new ResponseEntity<UserDto>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 }
