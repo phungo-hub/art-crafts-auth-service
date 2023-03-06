@@ -25,7 +25,8 @@ import java.util.Optional;
 @RequestMapping("/api/user")
 @CrossOrigin
 public class UserController {
-    private static String imageDirectory = System.getProperty("user.dir") + "/images/";
+//    private static String imageDirectory = System.getProperty("user.dir") + "/images/";
+    private static String imageDirectory = "/Users/phungo/Desktop/CodeGym/module-06-final-project/final-project-v2/client-app/public/assets";
     @Autowired
     UserService userService;
     @Autowired
@@ -118,7 +119,7 @@ public class UserController {
             directory.mkdir();
         }
     }
-    @RequestMapping(value = "/uploadImage", produces = {MediaType.IMAGE_JPEG_VALUE, "application/json"})
+    @RequestMapping(value = "/image", produces = {MediaType.IMAGE_JPEG_VALUE, "application/json"})
     public ResponseEntity<?> uploadImage(@RequestParam("imageFile") MultipartFile file,
                                          @RequestParam("imageName") String name) {
         makeDirectoryIfNotExist(imageDirectory);
