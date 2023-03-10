@@ -8,9 +8,11 @@ import com.artcrafts.artcraftsauthservice.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,8 +27,9 @@ import java.util.Optional;
 @RequestMapping("/api/user")
 @CrossOrigin
 public class UserController {
+    @Value("${file-upload}")
+    private String fileUpload;
 //    private static String imageDirectory = System.getProperty("user.dir") + "/images/";
-    private static String imageDirectory = "/Users/phungo/Desktop/CodeGym/module-06-final-project/final-project-v2/client-app/public/assets";
     @Autowired
     UserService userService;
     @Autowired
@@ -119,18 +122,16 @@ public class UserController {
             directory.mkdir();
         }
     }
-    @RequestMapping(value = "/image", produces = {MediaType.IMAGE_JPEG_VALUE, "application/json"})
-    public ResponseEntity<?> uploadImage(@RequestParam("imageFile") MultipartFile file,
-                                         @RequestParam("imageName") String name) {
-        makeDirectoryIfNotExist(imageDirectory);
-        Path fileNamePath = Paths.get(imageDirectory,
-                name.concat(".").concat(FilenameUtils.getExtension(file.getOriginalFilename())));
+
+    @PostMapping("/file")
+    public ResponseEntity<?> getFile(@RequestParam("file") MultipartFile multipartFile,@RequestHeader("Authorization") final String authToken) {
+        String filename = multipartFile.getOriginalFilename();
         try {
-            Files.write(fileNamePath, file.getBytes());
-            return new ResponseEntity<>(name, HttpStatus.CREATED);
+            FileCopyUtils.copy(multipartFile.getBytes(), new File(fileUpload + filename));
         } catch (IOException ex) {
-            return new ResponseEntity<>("Image is not uploaded", HttpStatus.BAD_REQUEST);
+            ex.printStackTrace();
         }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/search")

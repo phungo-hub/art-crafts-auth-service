@@ -6,12 +6,10 @@ import com.artcrafts.artcraftsauthservice.entity.RoleName;
 import com.artcrafts.artcraftsauthservice.entity.User;
 import com.artcrafts.artcraftsauthservice.repository.UserRepository;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;

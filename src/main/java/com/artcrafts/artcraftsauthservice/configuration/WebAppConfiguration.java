@@ -2,9 +2,11 @@ package com.artcrafts.artcraftsauthservice.configuration;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -19,6 +21,8 @@ import java.util.Collections;
 @Configuration
 @EnableSwagger2
 public class WebAppConfiguration implements WebMvcConfigurer {
+    @Value("${file-upload}")
+    private String fileUpload;
     @Bean
     public ModelMapper modelMapper() {
         // Tạo object và cấu hình
@@ -36,6 +40,13 @@ public class WebAppConfiguration implements WebMvcConfigurer {
                 .apis(RequestHandlerSelectors.basePackage("com.artcrafts"))
                 .build()
                 .apiInfo(apiDetails());
+    }
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/static/**")
+                .addResourceLocations("/static/");
+        registry.addResourceHandler("/image/**")
+                .addResourceLocations("file:" + fileUpload);
     }
 
     private ApiInfo apiDetails() {
