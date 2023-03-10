@@ -26,6 +26,7 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private ModelMapper modelMapper;
+
     @Override
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
@@ -91,6 +92,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Iterable<UserDto> findAll() {
         Iterable<User> entities = userRepository.findAll();
+
         return StreamSupport.stream(entities.spliterator(), true)
                 .map(entity -> modelMapper.map(entity, UserDto.class))
                 .collect(Collectors.toList());
